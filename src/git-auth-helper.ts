@@ -189,7 +189,9 @@ class GitAuthHelper {
   }
 
   async removeAuth(): Promise<void> {
+    core.info(`this.removeSsh ...`)
     await this.removeSsh()
+    core.info(`this.removeToken ...`)
     await this.removeToken()
   }
 
@@ -342,18 +344,24 @@ class GitAuthHelper {
     }
 
     // SSH command
+    core.info(`  this.removeGitConfig ...`)
     await this.removeGitConfig(SSH_COMMAND_KEY)
+    core.info(`  done this.removeGitConfig ...`)
   }
 
   private async removeToken(): Promise<void> {
+    core.info(` removeToken() ...`)
     // HTTP extra header
     await this.removeGitConfig(this.tokenConfigKey)
+    core.info(` done removeToken() ...`)
   }
 
   private async removeGitConfig(
     configKey: string,
     submoduleOnly: boolean = false
   ): Promise<void> {
+    core.info(` removeGitConfig() ...`)
+
     if (!submoduleOnly) {
       if (
         (await this.git.configExists(configKey)) &&
@@ -366,11 +374,13 @@ class GitAuthHelper {
 
     if (this.settings.submodules) {
       const pattern = regexpHelper.escape(configKey)
+      core.info(` submodules was true, calling this.git.submoduleForeach ...`)
       await this.git.submoduleForeach(
         // wrap the pipeline in quotes to make sure it's handled properly by submoduleForeach, rather than just the first part of the pipeline
         `sh -c "git config --local --name-only --get-regexp '${pattern}' && git config --local --unset-all '${configKey}' || :"`,
         true
       )
     }
+    core.info(` done removeGitConfig() ...`)
   }
 }

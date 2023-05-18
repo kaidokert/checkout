@@ -278,7 +278,9 @@ class GitAuthHelper {
     }
     removeAuth() {
         return __awaiter(this, void 0, void 0, function* () {
+            core.info(`this.removeSsh ...`);
             yield this.removeSsh();
+            core.info(`this.removeToken ...`);
             yield this.removeToken();
         });
     }
@@ -404,17 +406,22 @@ class GitAuthHelper {
                 }
             }
             // SSH command
+            core.info(`  this.removeGitConfig ...`);
             yield this.removeGitConfig(SSH_COMMAND_KEY);
+            core.info(`  done this.removeGitConfig ...`);
         });
     }
     removeToken() {
         return __awaiter(this, void 0, void 0, function* () {
+            core.info(` removeToken() ...`);
             // HTTP extra header
             yield this.removeGitConfig(this.tokenConfigKey);
+            core.info(` done removeToken() ...`);
         });
     }
     removeGitConfig(configKey, submoduleOnly = false) {
         return __awaiter(this, void 0, void 0, function* () {
+            core.info(` removeGitConfig() ...`);
             if (!submoduleOnly) {
                 if ((yield this.git.configExists(configKey)) &&
                     !(yield this.git.tryConfigUnset(configKey))) {
@@ -424,10 +431,12 @@ class GitAuthHelper {
             }
             if (this.settings.submodules) {
                 const pattern = regexpHelper.escape(configKey);
+                core.info(` submodules was true, calling this.git.submoduleForeach ...`);
                 yield this.git.submoduleForeach(
                 // wrap the pipeline in quotes to make sure it's handled properly by submoduleForeach, rather than just the first part of the pipeline
                 `sh -c "git config --local --name-only --get-regexp '${pattern}' && git config --local --unset-all '${configKey}' || :"`, true);
             }
+            core.info(` done removeGitConfig() ...`);
         });
     }
 }
